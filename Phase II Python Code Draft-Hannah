@@ -1,0 +1,172 @@
+#Phase I: Final Project
+%matplotlib inline
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.ticker import StrMethodFormatter
+from collections import defaultdict, Counter
+
+Breast_Cancer_Data = pd.read_csv("Breast-Cancer-Wisconsin.csv", sep="\,", na_values=['?'])
+Breast_Cancer_Data.columns = ["Sample Code Number","Clump Thickness","Uniformity of Cell Size","Uniformity of Cell Shape", "Marginal Adhesion", "Single Epithelial Cell Size", "Bare Nuclei", "Bland Chromatin", "Normal Nucleoli", "Mitoses", "Class"]
+
+#Checking for Null Values
+print(pd.isnull(Breast_Cancer_Data).any())
+null_counts = Breast_Cancer_Data.isnull().sum()
+print(null_counts)
+
+#Total Number of Null Values in All Columns
+null_counts = Breast_Cancer_Data.isnull().sum()
+print("The Total Number of Null Values for All Columns is: ")
+print(null_counts)
+
+#Total Number of Null Values in Column #7, "Bare Nuclei"
+Bare_Nuclei_null_counts = Breast_Cancer_Data['Bare Nuclei'].isnull().sum()
+print("The Total Number of Null Values for Column 7, Bare Nuclei is: ")
+print(Bare_Nuclei_null_counts)
+
+#Describing the Data: First Column (Sample Code Number)
+Breast_Cancer_Data['Sample Code Number'].value_counts()
+#Describing the Data: Second Column (Clump Thickness)
+Breast_Cancer_Data['Clump Thickness'].value_counts()
+#Describing the Data: Third Column (Uniformity of Cell Size)
+Breast_Cancer_Data['Uniformity of Cell Size'].value_counts()
+#Describing the Data: Fourth Column (Uniformity of Cell Shape)
+Breast_Cancer_Data['Uniformity of Cell Shape'].value_counts()
+#Describing the Data: Fifth Column (Marginal Adhesion)
+Breast_Cancer_Data['Marginal Adhesion'].value_counts()
+#Describing the Data: Sixth Column (Single Epithelial Cell Size)
+Breast_Cancer_Data['Single Epithelial Cell Size'].value_counts()
+#Describing the Data: Seventh Column (Bare Nuclei)
+Breast_Cancer_Data['Bare Nuclei'].value_counts()
+#Describing the Data: Eight Column (Bland Chromatin)
+Breast_Cancer_Data['Bland Chromatin'].value_counts()
+#Describing the Data: Ninth Column (Normal Nucleoli)
+Breast_Cancer_Data['Normal Nucleoli'].value_counts()
+#Describing the Data: Tenth Column (Mitoses)
+Breast_Cancer_Data['Mitoses'].value_counts()
+#Describing the Data: Tenth Column (Class)
+Breast_Cancer_Data['Class'].value_counts()
+
+df = pd.isnull(Breast_Cancer_Data)
+null_counts = df.isnull().sum()
+null_counts[null_counts > 0].sort_values(ascending=False)
+null_counts
+
+
+Breast_Cancer_Data['Bare Nuclei'].replace('?', np.NaN)
+Breast_Cancer_Data.to_csv("NEW_BC_data.csv")
+
+nrRows, nrCols = Breast_Cancer_Data.shape
+print("The Shape of the Dataset, Breast-Cancer-Wisconsin.csv is: ")
+print("The Total Number of Rows of the Dataset, Breast-Cancer-Wisconsin.csv is: ")
+print(nrRows)
+print("The Total Number of Column of the Dataset, Breast-Cancer-Wisconsin.csv is: ")
+print(nrCols)
+
+#Summary Statistics of the Dataset
+Dataset_Summary_statistics=Breast_Cancer_Data.describe()
+print(Dataset_Summary_statistics)
+
+#Converting Column #7, "Bare Nuclei" to Numeric Data:
+num_Breast_Cancer_Data = Breast_Cancer_Data["Bare Nuclei"].apply(pd.to_numeric, errors='ignore')
+
+#Mean for Each Column
+print("The Dataset Mean for Each Column is: ")
+print(Breast_Cancer_Data.mean())
+
+#Mean for Column #7, "Bare Nuclei"
+print("The Dataset Mean for Column #7, Bare Nuclei is: ")
+print(Breast_Cancer_Data["Bare Nuclei"].mean())
+
+#Finding the Mean
+#Mean_Column7=Breast_Cancer_Data["Bare Nuclei"].fillna(Breast_Cancer_Data["Bare Nuclei"].mean(), skipna=TRUE)
+#print("The Average of Column 7 is: ")
+#print(Mean_Column7) 
+
+print("The Statical Summary for the Dataset Breast_Cancer_Data is: ")
+print(Breast_Cancer_Data.describe())
+
+
+#Breast_Cancer_Data Total Number of Unique Values)
+print("Total Number of Unique Values: ")
+print(Breast_Cancer_Data.nunique())
+
+
+#Scatter Plot for Column #3: Uniformity of Cell Size
+# scatterplot
+Breast_Cancer_Data.plot(kind='scatter',x='Uniformity of Cell Size', y='Class', color='pink')
+
+#Barplot for Column #10: Class
+# Bar Plot
+#Bar_Plot=Breast_Cancer_Data['Class'].value_counts().plot(kind='bar', title= "Class Size", color='green')
+#print(Bar_Plot)
+#print("A class value of 2 is begnin, while a class value of is malignant")
+
+#Histogram for Column #2: Clump Thickness
+#Breast_Cancer_Data[["Clump Thickness","Uniformity of Cell Size","Uniformity of Cell Shape", "Marginal Adhesion", "Single Epithelial Cell Size", "Bare Nuclei", "Bland Chromatin", "Normal Nucleoli", "Mitoses"]].sum().plot.bar( title= "Breast Cancer Data", color='red')
+#Breast_Cancer_Data[["Clump Thickness","Uniformity of Cell Size","Uniformity of Cell Shape", "Marginal Adhesion", "Single Epithelial Cell Size", "Bare Nuclei", "Bland Chromatin", "Normal Nucleoli", "Mitoses"]].sum().plot.hist(title= "Breast Cancer Data", color='purple')
+
+
+#Phase II: Final Project
+#Selecting Columns
+NEW_Breast_Cancer_Data=df[["Clump Thickness","Uniformity of Cell Size","Uniformity of Cell Shape", "Marginal Adhesion", "Single Epithelial Cell Size", "Bare Nuclei", "Bland Chromatin", "Normal Nucleoli", "Mitoses"]]
+print(NEW_Breast_Cancer_Data)
+
+#Importing KMeans from sklearn.cluster
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import MinMaxScaler
+from scipy.spatial.distance import cdist
+
+#Creating a KMeans Model for 4 Cluster
+kmeans_model = KMeans(n_clusters=4).fit(NEW_Breast_Cancer_Data)
+print("KMeans Model for Breast Cancer Data:")
+print(kmeans_model)
+
+#Calculate Centroids
+centroids=kmeans_model.cluster_centers_
+print("Centroids for Breast Cancer Data:")
+print(centroids)
+
+#Finding the Optimal Number of Clusters (Elbow Method), source: https://bigdatascienc.wordpress.com/2017/12/29/k-means-clustering-in-python/
+#Attempt #1: Elbow Plot Method
+#K_Range=range(1,20)
+#distortions=[]
+
+#for i in K_Range:
+    #distortions.append(sum(np.min(cdist(NEW_Breast_Cancer_Data, centroids, 'euclidean'), axis=1))/NEW_Breast_Cancer_Data.shape[0])
+
+#fig1=plt.figure()
+#ex=fig1.add_subplot(111)
+#ex.plot(K_Range, distortions, 'b*')
+
+#plt.grid(True)
+#plt.ylim([0,0.001])
+#plt.xlabel('Number of Clusters')
+#plt.ylabel('Average Distortion')
+#plt.title("Selecting the Optimal K Amount Using the Elbow Method")
+
+#Attempt #2: Elbow Plot Method, source: https://blog.cambridgespark.com/how-to-determine-the-optimal-number-of-clusters-for-k-means-clustering-14f27070048f
+mms = MinMaxScaler()
+mms.fit(NEW_Breast_Cancer_Data)
+data_transformed = mms.transform(NEW_Breast_Cancer_Data)
+
+Sum_of_squared_distances = []
+K = range(1,15)
+for k in K:
+    km = KMeans(n_clusters=k)
+    km = km.fit(data_transformed)
+    Sum_of_squared_distances.append(km.inertia_)
+    
+plt.plot(K, Sum_of_squared_distances, 'bx-')
+plt.xlabel('k')
+plt.ylabel('Sum_of_squared_distances')
+plt.title('Elbow Method For Optimal k')
+plt.show()
+
+#The optimal Number of Clusters is 2
+print("the optimal number of clusters is: k=2")
+
+#Calculating Inertia
+#Creating a range from 1-15
+Inertia_Range=range(1,15)
+
