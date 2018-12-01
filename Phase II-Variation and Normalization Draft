@@ -1,0 +1,116 @@
+from pandas import Series, DataFrame
+import pandas as pd
+import numpy as np
+import matplotlib.pylab as plt
+from sklearn.cross_validation import train_test_split
+from sklearn.cluster import KMeans
+from statistics import stdev
+
+%matplotlib inline
+from sklearn.datasets import make_blobs
+from sklearn.cluster import KMeans
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+df= pd.read_csv("Breast-Cancer-Wisconsin.csv", na_values= ["?"])
+df= df.apply(pd.to_numeric, errors='coerce')
+
+#Fill in missing values with Mean
+df= df.fillna(df.mean())
+
+
+data_clean = df.fillna(df.mean())
+
+## Simply cleaning the data not utilizing labels since they aren't needed per the phase 2 form
+cluster = data_clean[['A2','A3','A4','A5','A6','A7',
+'A8','A9','A10']]
+
+#Print the clusters and describe the output
+print(cluster.describe())
+
+
+# Utilized to identify the k-means cluster analysis. Specifically looking at the range of 1-10 clusters
+from scipy.spatial.distance import cdist
+clusters=range(1,11)
+meandist=[]
+
+
+
+
+# Interpret 4 clusters for the Solution output
+
+#Revise data variation 
+#apply standard deviation function for columns A2-A10
+
+Standard_Deviation=cluster.std()
+print("The Standard Deviation is :")
+print(Standard_Deviation)
+
+
+#plot standard deviation values - select a graphic that could display all nine values [do not use histogram], add title, legend, ylabel, xlabel. Can you capture how wide or narrow is the variation in each column?
+y=range(2,11)
+plt.figure()
+plt.bar(y, Standard_Deviation)
+plt.xlabel('Number of clusters')
+plt.ylabel('Standard Deviation')
+plt.title('Standard Deviation')
+plt.show()
+
+#describe which features have a lot of data variation
+
+#Implement normalization 
+#import make_pipeline - use sklearn.pipeline
+from sklearn.pipeline import make_pipeline
+
+#import StandardScaler
+from sklearn.preprocessing import StandardScaler
+
+#review datacamp if needed on how to create a pipeline
+# Create scaler: scaler
+scaler = StandardScaler()
+
+%matplotlib inline
+from sklearn.datasets import make_blobs
+from sklearn.cluster import KMeans
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+# Create KMeans instance: kmeans
+kmeans = KMeans(n_clusters=2)
+kmeans.fit(cluster)
+labels = kmeans.predict(cluster)
+
+# Create pipeline: pipeline
+pipeline = make_pipeline(scaler,kmeans)
+
+# Fit the pipeline to samples
+pipeline.fit(cluster)
+
+# Calculate the cluster labels: labels
+labels = pipeline.predict(cluster)
+
+# Create a DataFrame with labels and species as columns: df
+ #df = pd.DataFrame({'labels': labels, 'species': species})
+
+#use the n_cluster based on the optimal number you have identified from Inertia
+inertia=[]
+for k in clusters:
+        model =KMeans(n_clusters=k) 
+        model.fit(cluster) 
+        inertia.append(model.inertia_)
+
+plt.plot(clusters, inertia, '-o')
+plt.xlabel('number of clusters, k')
+plt.ylabel('Inertia')
+plt.title('Range vs Inertia')
+plt.xticks(clusters)
+plt.show()
+
+
+
+#find centroids and print them
+centers=2
+new_y=range(0,699)
+print("This is the centroids values:")
+centroids = kmeans.cluster_centers_
+print(centroids)
